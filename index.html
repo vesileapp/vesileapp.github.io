@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vesile</title>
+<meta name="description" content="Vesile — namaz vakitleri, Kur'an, zikir ve hatim. iPhone ve Android için ücretsiz.">
+<meta property="og:title" content="Vesile">
+<meta property="og:description" content="Namaz vakitleri, Kur'an, zikir ve hatim · Prayer times, Qur'an, dhikr · مواقيت الصلاة والقرآن والذكر">
+<meta property="og:image" content="https://vesileapp.github.io/icon.png">
+<meta property="og:url" content="https://vesileapp.github.io">
+<meta name="twitter:card" content="summary">
+<meta name="apple-itunes-app" content="app-id=6799643752">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>
+  // Açan cihaza göre mağazaya yönlendir. Bilgisayarda iki düğmeli sayfa kalır.
+  // Adresin sonuna #sayfa eklenirse yönlendirme yapılmaz (deneme için).
+  // Android henüz kapalı testte: Play sayfası herkese açılınca true yap.
+  var ANDROID_PUBLIC = false;
+  (function () {
+    var IOS = "https://apps.apple.com/app/id6799643752";
+    var ANDROID = "https://play.google.com/store/apps/details?id=com.emrebarutcu.vesile";
+    if (location.hash === "#sayfa") return;
+    var ua = navigator.userAgent || "";
+    var ipadDesktop = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
+    if (/iPhone|iPad|iPod/.test(ua) || ipadDesktop) location.replace(IOS);
+    else if (/Android/.test(ua) && ANDROID_PUBLIC) location.replace(ANDROID);
+  })();
+</script>
+<style>
+  :root { --bg: #0f1411; --card: #f6f0e1; --ink: #1d2420; --dim: #5f675f; --gold: #c9a24b; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); color: var(--ink); padding: 24px 16px;
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Arabic", sans-serif;
+  }
+  main { width: 100%; max-width: 380px; background: var(--card); border-radius: 24px; padding: 32px 24px; text-align: center; }
+  img { width: 96px; height: 96px; border-radius: 22px; }
+  h1 { margin: 16px 0 4px; font-size: 28px; }
+  p { margin: 0 0 24px; color: var(--dim); }
+  .btn {
+    display: block; margin-top: 12px; padding: 14px; border-radius: 14px;
+    background: var(--ink); color: #fff; text-decoration: none; font-weight: 600;
+  }
+  .btn.off { background: #d9d1bd; color: var(--dim); }
+  a.btn small, .btn small { display: block; font-weight: 400; opacity: .75; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <img src="icon.png" alt="">
+  <h1>Vesile</h1>
+  <p id="tag">Namaz vakitleri, Kur'an, zikir ve hatim. Ücretsiz.</p>
+  <a class="btn" href="https://apps.apple.com/app/id6799643752"><small id="ios">iPhone için</small>App Store</a>
+  <a class="btn" id="play" href="https://play.google.com/store/apps/details?id=com.emrebarutcu.vesile"><small id="and">Android için</small>Google Play</a>
+  <div class="btn off" id="soon"><small id="and2">Android için</small><span id="soonT">Google Play — yakında</span></div>
+</main>
+<script>
+  document.getElementById(ANDROID_PUBLIC ? "soon" : "play").style.display = "none";
+  // Sayfa metni cihaz dilinde: tr · ar · en (diğerleri İngilizce)
+  var T = {
+    en: ["Prayer times, Qur'an, dhikr and khatm. Free.", "For iPhone", "For Android", "For Android", "Google Play — coming soon"],
+    ar: ["مواقيت الصلاة والقرآن والذكر والختمة. مجاني.", "لأجهزة iPhone", "لأجهزة Android", "لأجهزة Android", "Google Play — قريبًا"]
+  };
+  var lang = (navigator.language || "en").slice(0, 2);
+  if (lang !== "tr") {
+    var t = T[lang] || T.en;
+    document.documentElement.lang = T[lang] ? lang : "en";
+    if (lang === "ar") document.documentElement.dir = "rtl";
+    ["tag", "ios", "and", "and2", "soonT"].forEach(function (id, i) { document.getElementById(id).textContent = t[i]; });
+  }
+</script>
+</body>
+</html>
