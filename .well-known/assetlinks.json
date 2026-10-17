@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.emrebarutcu.vesile",
+      "sha256_cert_fingerprints": [
+        "5B:01:45:FB:2B:D9:31:FB:7F:28:05:5A:28:EA:37:EC:FF:2D:0F:37:D6:10:36:D0:DF:13:1E:ED:AC:0F:38:74"
+      ]
+    }
+  }
+]
