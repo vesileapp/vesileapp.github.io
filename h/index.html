@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hatime davetlisin · Vesile</title>
+<!-- WhatsApp önizlemesi (sabit; hatmin adı mesaj metninde yazar). Görsel: ChatGPT'den gelecek
+     davet-genel.png bu dosyanın yerine og.png adıyla konur (1200×630). -->
+<meta name="description" content="Bir cüz al, hatmi birlikte bitirelim. Vesile ile Toplu Hatim.">
+<meta property="og:title" content="Hatime davetlisin 🤲">
+<meta property="og:description" content="Bir cüz al, hatmi birlikte bitirelim — Vesile">
+<meta property="og:image" content="https://vesileapp.github.io/h/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="apple-itunes-app" content="app-id=6799643752">
+<link rel="icon" href="../icon.png">
+<style>
+  :root { --bg: #0f1411; --card: #f6f0e1; --ink: #1d2420; --dim: #5f675f; --gold: #c9a24b; --green: #1f7a55; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); color: var(--ink); padding: 24px 16px;
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Arabic", sans-serif;
+  }
+  main { width: 100%; max-width: 400px; background: var(--card); border-radius: 24px; padding: 28px 22px; text-align: center; }
+  img { width: 72px; height: 72px; border-radius: 18px; }
+  .kicker { margin: 12px 0 2px; color: var(--dim); font-size: 14px; }
+  h1 { margin: 0 0 6px; font-size: 24px; line-height: 1.3; word-wrap: break-word; }
+  .ded { margin: 0 0 14px; color: var(--dim); font-style: italic; word-wrap: break-word; }
+  .bar { height: 10px; border-radius: 6px; background: #e3dac4; overflow: hidden; margin: 14px 0 6px; }
+  .bar i { display: block; height: 100%; background: var(--gold); width: 0; }
+  .prog { font-size: 14px; color: var(--dim); margin: 0 0 18px; }
+  .btn {
+    display: block; width: 100%; margin-top: 12px; padding: 15px; border: 0; border-radius: 14px;
+    background: var(--ink); color: #fff; text-decoration: none; font: inherit; font-weight: 700; cursor: pointer;
+  }
+  .btn.alt { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+  .code { margin: 18px 0 0; font-size: 14px; color: var(--dim); }
+  .code b { font-size: 20px; letter-spacing: 3px; color: var(--ink); }
+  .toast { margin-top: 10px; font-size: 13px; color: var(--green); min-height: 18px; }
+</style>
+</head>
+<body>
+<main>
+  <img src="../icon.png" alt="">
+  <p class="kicker" id="kicker">Toplu Hatime davetlisin</p>
+  <h1 id="name">…</h1>
+  <p class="ded" id="ded" hidden></p>
+  <div class="bar"><i id="barFill"></i></div>
+  <p class="prog" id="prog"></p>
+  <a class="btn" id="open" href="#">Vesile'de aç ve katıl</a>
+  <a class="btn alt" id="get" href="#">Vesile'yi indir</a>
+  <p class="code" id="codeLine"><span id="codeLbl">Katılım kodu</span><br><b id="code"></b></p>
+  <p class="toast" id="toast"></p>
+</main>
+<script>
+(function () {
+  // Metinler cihaz dilinde: tr · ar · en (diğerleri İngilizce)
+  var T = {
+    tr: { kicker: "Toplu Hatime davetlisin", open: "Vesile'de aç ve katıl", get: "Vesile'yi indir",
+          codeLbl: "Katılım kodu", prog: "{t}/30 cüz alındı · {d} cüz okundu", done: "Bu hatim tamamlandı. Allah kabul etsin 🤲",
+          missing: "Bu davet bulunamadı. Kodu davet edenden tekrar iste.", copied: "Kod kopyalandı. Uygulamada Ümmet → Toplu Hatim → Kodla katıl.",
+          loading: "Yükleniyor…" },
+    ar: { kicker: "أنت مدعو إلى ختمة جماعية", open: "افتح Vesile وانضم", get: "حمّل Vesile",
+          codeLbl: "رمز الانضمام", prog: "أُخذ {t}/30 جزءًا · قُرئ {d}", done: "اكتملت هذه الختمة. تقبّل الله 🤲",
+          missing: "لم يتم العثور على هذه الدعوة. اطلب الرمز من جديد.", copied: "نُسخ الرمز. في التطبيق: الأمة ← الختمة الجماعية ← الانضمام برمز.",
+          loading: "جارٍ التحميل…" },
+    en: { kicker: "You're invited to a group khatm", open: "Open in Vesile & join", get: "Get Vesile",
+          codeLbl: "Join code", prog: "{t}/30 juz taken · {d} read", done: "This khatm is complete. May Allah accept it 🤲",
+          missing: "This invite wasn't found. Ask for the code again.", copied: "Code copied. In the app: Ummah → Group Khatm → Join with code.",
+          loading: "Loading…" }
+  };
+  var lang = (navigator.language || "en").slice(0, 2);
+  var L = T[lang] || T.en;
+  if (lang !== "tr") { document.documentElement.lang = T[lang] ? lang : "en"; if (lang === "ar") document.documentElement.dir = "rtl"; }
+  // Resmî Vesile hatimlerinin adları (sunucu nameKey gönderir)
+  var OFFICIAL = {
+    hatim_official_general:  { tr: "Herkese Açık Genel Hatim", ar: "ختمة عامة للجميع", en: "Open General Khatm" },
+    hatim_official_martyrs:  { tr: "Şehitlerimiz İçin Hatim", ar: "ختمة لأرواح الشهداء", en: "Khatm for Our Martyrs" },
+    hatim_official_parents:  { tr: "Anne ve Babalarımız İçin Hatim", ar: "ختمة لآبائنا وأمهاتنا", en: "Khatm for Our Parents" },
+    hatim_official_deceased: { tr: "Vefat Eden Mü'minler İçin Hatim", ar: "ختمة لأرواح المؤمنين المتوفّين", en: "Khatm for Deceased Believers" }
+  };
+  function $(id) { return document.getElementById(id); }
+  ["kicker", "open", "get", "codeLbl"].forEach(function (k) { $(k).textContent = L[k]; });
+  $("name").textContent = L.loading;
+
+  var code = (new URLSearchParams(location.search).get("c") || "").trim().toUpperCase();
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/.test(ua);
+  var IOS_STORE = "https://apps.apple.com/app/id6799643752";
+  // Android: Play'e kod "referrer" olarak gider → uygulama ilk açılışta kendiliğinden katılır
+  var PLAY = "https://play.google.com/store/apps/details?id=com.emrebarutcu.vesile&referrer=" + encodeURIComponent("hatim=" + code);
+
+  if (!/^[A-Z0-9]{6}$/.test(code)) { $("name").textContent = L.missing; $("open").hidden = true; $("codeLine").hidden = true; }
+  $("code").textContent = code;
+
+  // Uygulamada aç: Android'de intent (yüklü değilse Play'e düşer), iPhone'da vesile:// şeması
+  $("open").href = isAndroid
+    ? "intent://h?c=" + code + "#Intent;scheme=vesile;package=com.emrebarutcu.vesile;S.browser_fallback_url=" + encodeURIComponent(PLAY) + ";end"
+    : "vesile://h?c=" + code;
+  $("get").href = isAndroid ? PLAY : IOS_STORE;
+  // İndirirken kod panoya kopyalanır (iPhone'da kurulumdan sonra elle girilecek)
+  $("get").addEventListener("click", function () {
+    if (navigator.clipboard && code) navigator.clipboard.writeText(code).then(function () { $("toast").textContent = L.copied; }, function () {});
+  });
+  if (!isIOS && !isAndroid) $("open").hidden = true;   // bilgisayarda yalnız indirme + kod
+
+  if (!/^[A-Z0-9]{6}$/.test(code)) return;
+  fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/hatim/" + code)
+    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+    .then(function (g) {
+      var name = (g.nameKey && OFFICIAL[g.nameKey]) ? (OFFICIAL[g.nameKey][lang] || OFFICIAL[g.nameKey].en) : g.name;
+      $("name").textContent = name;
+      document.title = name + " · Vesile";
+      if (g.dedication && !g.dedicationKey) { $("ded").textContent = g.dedication; $("ded").hidden = false; }
+      $("barFill").style.width = Math.round((g.taken / 30) * 100) + "%";
+      $("prog").textContent = g.completed ? L.done : L.prog.replace("{t}", g.taken).replace("{d}", g.done);
+    })
+    .catch(function () { $("name").textContent = L.missing; });
+})();
+</script>
+</body>
+</html>

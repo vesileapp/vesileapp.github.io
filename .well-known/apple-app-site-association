@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["W9L8MX92W2.com.emrebarutcu.ezanvakti"],
+        "components": [
+          { "/": "/h", "comment": "hatim daveti (1.6)" },
+          { "/": "/h/*", "comment": "hatim daveti (1.6)" }
+        ]
+      }
+    ]
+  }
+}
