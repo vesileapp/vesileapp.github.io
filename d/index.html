@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dua isteği · Vesile</title>
+<!-- D1 (1.6): hatim davetiyle aynı altyapı. Önizleme görseli şimdilik hatimle ortak (h/og.jpg). -->
+<meta name="description" content="Âmin demek için dokun — Vesile">
+<meta property="og:title" content="Bir dua isteği var 🤲">
+<meta property="og:description" content="Âmin demek için dokun — Vesile">
+<meta property="og:image" content="https://vesileapp.github.io/h/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="apple-itunes-app" content="app-id=6799643752">
+<link rel="icon" href="../icon.png">
+<style>
+  :root { --bg: #0f1411; --card: #f6f0e1; --ink: #1d2420; --dim: #5f675f; --gold: #c9a24b; --green: #1f7a55; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); color: var(--ink); padding: 24px 16px;
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Arabic", sans-serif;
+  }
+  main { width: 100%; max-width: 400px; background: var(--card); border-radius: 24px; padding: 28px 22px; text-align: center; }
+  img { width: 72px; height: 72px; border-radius: 18px; }
+  .kicker { margin: 12px 0 2px; color: var(--dim); font-size: 14px; }
+  h1 { margin: 0 0 6px; font-size: 24px; line-height: 1.3; word-wrap: break-word; }
+  .ded { margin: 0 0 14px; color: var(--dim); font-style: italic; word-wrap: break-word; }
+  .bar { height: 10px; border-radius: 6px; background: #e3dac4; overflow: hidden; margin: 14px 0 6px; }
+  .bar i { display: block; height: 100%; background: var(--gold); width: 0; }
+  .prog { font-size: 14px; color: var(--dim); margin: 0 0 18px; }
+  .btn {
+    display: block; width: 100%; margin-top: 12px; padding: 15px; border: 0; border-radius: 14px;
+    background: var(--ink); color: #fff; text-decoration: none; font: inherit; font-weight: 700; cursor: pointer;
+  }
+  .btn.alt { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+  .chip { display: inline-block; margin: 6px 0; padding: 3px 12px; border-radius: 99px; background: #e9dfc6; font-size: 13px; color: var(--dim); }
+  .code { margin: 18px 0 0; font-size: 14px; color: var(--dim); }
+  .code b { font-size: 20px; letter-spacing: 3px; color: var(--ink); }
+  .toast { margin-top: 10px; font-size: 13px; color: var(--green); min-height: 18px; }
+</style>
+</head>
+<body>
+<main>
+  <img src="../icon.png" alt="">
+  <p class="kicker" id="kicker"></p>
+  <span class="chip" id="chip" hidden></span>
+  <h1 id="name">…</h1>
+  <div class="bar" id="bar" hidden><i id="barFill"></i></div>
+  <p class="prog" id="prog"></p>
+  <a class="btn" id="open" href="#"></a>
+  <a class="btn alt" id="get" href="#"></a>
+</main>
+<script>
+(function () {
+  var T = {"tr": {"kicker": "Dua isteği", "open": "Vesile'de aç ve Âmin de", "get": "Vesile'yi indir", "prog": "{n} kişi Âmin dedi", "missing": "Bu dua isteği bulunamadı.", "loading": "Yükleniyor…"}, "ar": {"kicker": "طلب دعاء", "open": "افتح Vesile وقل آمين", "get": "حمّل Vesile", "prog": "قال {n} شخصًا آمين", "missing": "لم يتم العثور على طلب الدعاء.", "loading": "جارٍ التحميل…"}, "en": {"kicker": "Dua request", "open": "Open in Vesile & say Ameen", "get": "Get Vesile", "prog": "{n} people said Ameen", "missing": "This dua request wasn't found.", "loading": "Loading…"}};
+  var X0 = {"tr": {"illness": "Hastalık", "deceased": "Vefat", "exam": "Sınav", "travel": "Yolculuk", "debt": "Borç", "guidance": "Hidayet", "other": "Diğer"}, "ar": {"illness": "مرض", "deceased": "وفاة", "exam": "امتحان", "travel": "سفر", "debt": "دَين", "guidance": "هداية", "other": "أخرى"}, "en": {"illness": "Illness", "deceased": "Deceased", "exam": "Exam", "travel": "Travel", "debt": "Debt", "guidance": "Guidance", "other": "Other"}};
+  var lang = (navigator.language || "en").slice(0, 2);
+  var L = T[lang] || T.en, X = X0[lang] || X0.en;
+  if (lang !== "tr") { document.documentElement.lang = T[lang] ? lang : "en"; if (lang === "ar") document.documentElement.dir = "rtl"; }
+  function $(id) { return document.getElementById(id); }
+  ["kicker", "open", "get"].forEach(function (k) { $(k).textContent = L[k]; });
+  $("name").textContent = L.loading;
+  var id = (new URLSearchParams(location.search).get("i") || "").trim();
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/.test(ua);
+  var IOS_STORE = "https://apps.apple.com/app/id6799643752";
+  // Android: Play'e kimlik "referrer" olarak gider → uygulama ilk açılışta kendiliğinden açar
+  var PLAY = "https://play.google.com/store/apps/details?id=com.emrebarutcu.vesile&referrer=" + encodeURIComponent("d=" + id);
+  if (!/^[0-9a-f-]{36}$/i.test(id)) { $("name").textContent = L.missing; $("open").hidden = true; return; }
+  $("open").href = isAndroid
+    ? "intent://d?i=" + encodeURIComponent(id) + "#Intent;scheme=vesile;package=com.emrebarutcu.vesile;S.browser_fallback_url=" + encodeURIComponent(PLAY) + ";end"
+    : "vesile://d?i=" + encodeURIComponent(id);
+  $("get").href = isAndroid ? PLAY : IOS_STORE;
+  if (!isIOS && !isAndroid) $("open").hidden = true;
+  fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/dua/" + encodeURIComponent(id))
+    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+    .then(function (g) {
+      $("name").textContent = "“" + g.text + "”"; if (X[g.category]) { $("chip").textContent = X[g.category]; $("chip").hidden = false; }
+      $("prog").textContent = L.prog.replace("{n}", g.aminCount); document.title = L.kicker + " · Vesile";
+    })
+    .catch(function () { $("name").textContent = L.missing; });
+})();
+</script>
+</body>
+</html>
