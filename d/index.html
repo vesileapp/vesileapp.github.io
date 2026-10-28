@@ -70,11 +70,12 @@
   var IOS_STORE = "https://apps.apple.com/app/id6799643752";
   // Android: Play'e kimlik "referrer" olarak gider → uygulama ilk açılışta kendiliğinden açar
   var PLAY = "https://play.google.com/store/apps/details?id=com.emrebarutcu.vesile&referrer=" + encodeURIComponent("d=" + id);
+  // İndirme linki doğrulamadan önce: bozuk/yarım linkte de "Vesile'yi indir" mağazaya gider
+  $("get").href = isAndroid ? PLAY : IOS_STORE;
   if (!/^[0-9a-f-]{36}$/i.test(id)) { $("name").textContent = L.missing; $("open").hidden = true; return; }
   $("open").href = isAndroid
     ? "intent://d?i=" + encodeURIComponent(id) + "#Intent;scheme=vesile;package=com.emrebarutcu.vesile;S.browser_fallback_url=" + encodeURIComponent(PLAY) + ";end"
     : "vesile://d?i=" + encodeURIComponent(id);
-  $("get").href = isAndroid ? PLAY : IOS_STORE;
   if (!isIOS && !isAndroid) $("open").hidden = true;
   fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/dua/" + encodeURIComponent(id))
     .then(function (r) { if (!r.ok) throw 0; return r.json(); })
