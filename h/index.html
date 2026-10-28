@@ -92,7 +92,9 @@
   var isAndroid = /Android/.test(ua);
   var IOS_STORE = "https://apps.apple.com/app/id6799643752";
   // Android: Play'e kod "referrer" olarak gider → uygulama ilk açılışta kendiliğinden katılır
-  var PLAY = "https://play.google.com/store/apps/details?id=com.emrebarutcu.vesile&referrer=" + encodeURIComponent("hatim=" + code);
+  var validId = /^[A-Z0-9]{6}$/.test(code);
+  // Geçersiz kimlik Play referrer'ına gitmez (uygulama bozuk daveti kaydetmesin)
+  var PLAY = "https://play.google.com/store/apps/details?id=com.emrebarutcu.vesile" + (validId ? "&referrer=" + encodeURIComponent("hatim=" + code) : "");
 
   if (!/^[A-Z0-9]{6}$/.test(code)) { $("name").textContent = L.missing; $("open").hidden = true; $("codeLine").hidden = true; }
   $("code").textContent = code;
@@ -101,7 +103,8 @@
   $("open").href = isAndroid
     ? "intent://h?c=" + code + "#Intent;scheme=vesile;package=com.emrebarutcu.vesile;S.browser_fallback_url=" + encodeURIComponent(PLAY) + ";end"
     : "vesile://h?c=" + code;
-  $("get").href = isAndroid ? PLAY : IOS_STORE;
+  // Masaüstünde iki mağaza düğmeli ortak indirme sayfası
+  $("get").href = isAndroid ? PLAY : isIOS ? IOS_STORE : "/";
   // İndirirken kod panoya kopyalanır (iPhone'da kurulumdan sonra elle girilecek)
   $("get").addEventListener("click", function () {
     if (navigator.clipboard && code) navigator.clipboard.writeText(code).then(function () { $("toast").textContent = L.copied; }, function () {});

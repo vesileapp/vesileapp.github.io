@@ -69,9 +69,12 @@
   var isAndroid = /Android/.test(ua);
   var IOS_STORE = "https://apps.apple.com/app/id6799643752";
   // Android: Play'e kimlik "referrer" olarak gider → uygulama ilk açılışta kendiliğinden açar
-  var PLAY = "https://play.google.com/store/apps/details?id=com.emrebarutcu.vesile&referrer=" + encodeURIComponent("z=" + id);
+  var validId = /^[A-Za-z0-9_-]{1,64}$/.test(id);
+  // Geçersiz kimlik Play referrer'ına gitmez (uygulama bozuk daveti kaydetmesin)
+  var PLAY = "https://play.google.com/store/apps/details?id=com.emrebarutcu.vesile" + (validId ? "&referrer=" + encodeURIComponent("z=" + id) : "");
   // İndirme linki doğrulamadan önce: bozuk/yarım linkte de "Vesile'yi indir" mağazaya gider
-  $("get").href = isAndroid ? PLAY : IOS_STORE;
+  // Masaüstünde iki mağaza düğmeli ortak indirme sayfası
+  $("get").href = isAndroid ? PLAY : isIOS ? IOS_STORE : "/";
   if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) { $("name").textContent = L.missing; $("open").hidden = true; return; }
   $("open").href = isAndroid
     ? "intent://z?i=" + encodeURIComponent(id) + "#Intent;scheme=vesile;package=com.emrebarutcu.vesile;S.browser_fallback_url=" + encodeURIComponent(PLAY) + ";end"
