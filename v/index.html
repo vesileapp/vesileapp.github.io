@@ -94,6 +94,11 @@
   if (valid) {
     fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/ref/" + code + "/open", { method: "POST", keepalive: true }).catch(function () {});
   }
+  // Telefonda sayfada bekletme: uygulama yüklüyse link zaten uygulamayı açar, buraya gelen mağazaya gider.
+  // Düğmeler yönlendirme engellenirse diye sayfada kalır.
+  if (isIOS || isAndroid) {
+    setTimeout(function () { location.replace(isIOS ? IOS_STORE : PLAY); }, 150);
+  }
 })();
 </script>
 </body>
