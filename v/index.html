@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Vesile · Arkadaşın öneriyor</title>
+<!-- Arkadaşına öner (1.7.2). Önizleme sabit; linkte kişi bilgisi yok, yalnız opak kod (c). -->
+<meta name="description" content="Namaz vakitleri, Kur'an, toplu hatim ve zikir bir arada.">
+<meta property="og:title" content="Vesile'yi sana öneriyorum 🤲">
+<meta property="og:description" content="Namaz vakitleri, Kur'an, toplu hatim ve zikir bir arada.">
+<meta property="og:image" content="https://vesileapp.github.io/h/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="apple-itunes-app" content="app-id=6799643752">
+<link rel="icon" href="../icon.png">
+<style>
+  :root { --bg: #0f1411; --card: #f6f0e1; --ink: #1d2420; --dim: #5f675f; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); color: var(--ink); padding: 24px 16px;
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Arabic", sans-serif;
+  }
+  main { width: 100%; max-width: 400px; background: var(--card); border-radius: 24px; padding: 28px 22px; text-align: center; }
+  img { width: 72px; height: 72px; border-radius: 18px; }
+  .kicker { margin: 12px 0 2px; color: var(--dim); font-size: 14px; }
+  h1 { margin: 0 0 8px; font-size: 24px; line-height: 1.3; }
+  p.sub { margin: 0 0 18px; color: var(--dim); }
+  .btn {
+    display: block; width: 100%; margin-top: 12px; padding: 15px; border: 0; border-radius: 14px;
+    background: var(--ink); color: #fff; text-decoration: none; font: inherit; font-weight: 700; cursor: pointer;
+  }
+  .btn.alt { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+</style>
+</head>
+<body>
+<main>
+  <img src="../icon.png" alt="">
+  <p class="kicker" id="kicker"></p>
+  <h1 id="title">Vesile</h1>
+  <p class="sub" id="sub"></p>
+  <a class="btn" id="get" href="#"></a>
+  <a class="btn alt" id="play" href="#" hidden>Google Play</a>
+  <a class="btn alt" id="open" href="#" hidden></a>
+</main>
+<script>
+(function () {
+  // Metinler cihaz dilinde: tr · ar · en (diğerleri İngilizce)
+  var T = {
+    tr: { kicker: "Arkadaşın öneriyor", sub: "Namaz vakitleri, Kur'an, toplu hatim ve zikir bir arada.", get: "Vesile'yi indir", store: "App Store", open: "Zaten yüklü, Vesile'de aç" },
+    ar: { kicker: "صديقك يقترح عليك", sub: "مواقيت الصلاة والقرآن والختمة الجماعية والذكر في مكان واحد.", get: "حمّل Vesile", store: "App Store", open: "مثبّت بالفعل، افتح Vesile" },
+    en: { kicker: "A friend recommends", sub: "Prayer times, Quran, group khatm and dhikr in one place.", get: "Get Vesile", store: "App Store", open: "Already installed, open Vesile" }
+  };
+  var lang = (navigator.language || "en").slice(0, 2);
+  var L = T[lang] || T.en;
+  if (lang !== "tr") { document.documentElement.lang = T[lang] ? lang : "en"; if (lang === "ar") document.documentElement.dir = "rtl"; }
+  function $(id) { return document.getElementById(id); }
+  $("kicker").textContent = L.kicker;
+  $("sub").textContent = L.sub;
+  $("open").textContent = L.open;
+
+  var code = (new URLSearchParams(location.search).get("c") || "").trim().toUpperCase();
+  var valid = /^[A-HJ-NP-Z2-9]{8}$/.test(code);
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/.test(ua);
+  var IOS_STORE = "https://apps.apple.com/app/id6799643752";
+  // Android: kod Play'e "referrer" olarak gider → uygulama ilk açılışta okur. Geçersiz kod gönderilmez.
+  var PLAY = "https://play.google.com/store/apps/details?id=com.emrebarutcu.vesile" + (valid ? "&referrer=" + encodeURIComponent("ref=" + code) : "");
+  var url = "https://vesileapp.github.io/v/" + (valid ? "?c=" + code : "");
+
+  if (isAndroid) {
+    // Yüklüyse uygulama açılır, değilse Play (referrer ile)
+    $("get").textContent = L.get;
+    $("get").href = valid
+      ? "intent://v?c=" + code + "#Intent;scheme=vesile;package=com.emrebarutcu.vesile;S.browser_fallback_url=" + encodeURIComponent(PLAY) + ";end"
+      : PLAY;
+  } else if (isIOS) {
+    $("get").textContent = L.get;
+    $("get").href = IOS_STORE;
+    // Apple kurulum sonrası kod taşımaz: link panoya alınır, uygulama ilk açılışta yapıştırmayı önerir
+    $("get").addEventListener("click", function () {
+      if (valid && navigator.clipboard) navigator.clipboard.writeText(url).catch(function () {});
+    });
+    if (valid) { $("open").href = "vesile://v?c=" + code; $("open").hidden = false; }
+  } else {
+    // Bilgisayarda iki mağaza
+    $("get").textContent = L.store;
+    $("get").href = IOS_STORE;
+    $("play").href = PLAY;
+    $("play").hidden = false;
+  }
+
+  // Sayaç: yalnız sayfa açıldı bilgisi (kişi bilgisi yok); başarısız olursa önemsiz
+  if (valid) {
+    fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/ref/" + code + "/open", { method: "POST", keepalive: true }).catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>

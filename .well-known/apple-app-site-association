@@ -29,6 +29,14 @@
           {
             "/": "/z/*",
             "comment": "toplu zikir daveti (1.6 D1)"
+          },
+          {
+            "/": "/v",
+            "comment": "arkadaşına öner (1.7.2)"
+          },
+          {
+            "/": "/v/*",
+            "comment": "arkadaşına öner (1.7.2)"
           }
         ]
       }
