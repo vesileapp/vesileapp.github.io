@@ -81,10 +81,6 @@
   } else if (isIOS) {
     $("get").textContent = L.get;
     $("get").href = IOS_STORE;
-    // Apple kurulum sonrası kod taşımaz: link panoya alınır, uygulama ilk açılışta yapıştırmayı önerir
-    $("get").addEventListener("click", function () {
-      if (valid && navigator.clipboard) navigator.clipboard.writeText(url).catch(function () {});
-    });
     if (valid) { $("open").href = "vesile://v?c=" + code; $("open").hidden = false; }
   } else {
     // Bilgisayarda iki mağaza
