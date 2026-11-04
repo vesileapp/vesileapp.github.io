@@ -39,6 +39,7 @@
   .btn.alt { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
   .code { margin: 18px 0 0; font-size: 14px; color: var(--dim); }
   .code b { font-size: 20px; letter-spacing: 3px; color: var(--ink); }
+  .note { margin: 14px 0 0; font-size: 14px; color: var(--ink); }
   .toast { margin-top: 10px; font-size: 13px; color: var(--green); min-height: 18px; }
 </style>
 </head>
@@ -53,6 +54,7 @@
   <a class="btn" id="open" href="#">Vesile'de aç ve katıl</a>
   <a class="btn alt" id="get" href="#">Vesile'yi indir</a>
   <p class="code" id="codeLine"><span id="codeLbl">Katılım kodu</span><br><b id="code"></b></p>
+  <p class="note" id="iosNote" hidden></p>
   <p class="toast" id="toast"></p>
 </main>
 <script>
@@ -61,15 +63,15 @@
   var T = {
     tr: { kicker: "Toplu Hatime davetlisin", open: "Vesile'de aç ve katıl", get: "Vesile'yi indir",
           codeLbl: "Katılım kodu", prog: "{t}/30 cüz alındı · {d} cüz okundu", done: "Bu hatim tamamlandı. Allah kabul etsin 🤲",
-          missing: "Bu davet bulunamadı. Kodu davet edenden tekrar iste.", copied: "Kod kopyalandı. Uygulamada Ümmet → Toplu Hatim → Kodla katıl.",
+          missing: "Bu davet bulunamadı. Kodu davet edenden tekrar iste.", copied: "Kod kopyalandı.", have: "Zaten yüklü mü? Vesile'de aç", iosNote: "Kurduktan sonra: Ümmet → Toplu Hatim → Kodla katıl",
           loading: "Yükleniyor…" },
     ar: { kicker: "أنت مدعو إلى ختمة جماعية", open: "افتح Vesile وانضم", get: "حمّل Vesile",
           codeLbl: "رمز الانضمام", prog: "أُخذ {t}/30 جزءًا · قُرئ {d}", done: "اكتملت هذه الختمة. تقبّل الله 🤲",
-          missing: "لم يتم العثور على هذه الدعوة. اطلب الرمز من جديد.", copied: "نُسخ الرمز. في التطبيق: الأمة ← الختمة الجماعية ← الانضمام برمز.",
+          missing: "لم يتم العثور على هذه الدعوة. اطلب الرمز من جديد.", copied: "نُسخ الرمز.", have: "هل التطبيق مثبّت؟ افتح Vesile", iosNote: "بعد التثبيت: الأمة ← الختمة الجماعية ← الانضمام برمز",
           loading: "جارٍ التحميل…" },
     en: { kicker: "You're invited to a group khatm", open: "Open in Vesile & join", get: "Get Vesile",
           codeLbl: "Join code", prog: "{t}/30 juz taken · {d} read", done: "This khatm is complete. May Allah accept it 🤲",
-          missing: "This invite wasn't found. Ask for the code again.", copied: "Code copied. In the app: Ummah → Group Khatm → Join with code.",
+          missing: "This invite wasn't found. Ask for the code again.", copied: "Code copied.", have: "Already installed? Open Vesile", iosNote: "After installing: Ummah → Group Khatm → Join with code",
           loading: "Loading…" }
   };
   var lang = (navigator.language || "en").slice(0, 2);
@@ -110,6 +112,21 @@
     if (navigator.clipboard && code) navigator.clipboard.writeText(code).then(function () { $("toast").textContent = L.copied; }, function () {});
   });
   if (!isIOS && !isAndroid) $("open").hidden = true;   // bilgisayarda yalnız indirme + kod
+  // iPhone (4 Kas 2026): uygulaması olan link çoğunlukla sayfayı görmeden açar. Sayfayı görenin
+  // uygulaması yoktur ve vesile:// hata verir; bu yüzden indirme öne geçer, yol da baştan yazılır.
+  if (isIOS) {
+    $("get").className = "btn"; $("open").className = "btn alt"; $("open").textContent = L.have;
+    $("get").parentNode.insertBefore($("get"), $("open"));
+    if (validId) { $("iosNote").textContent = L.iosNote; $("iosNote").hidden = false; }
+  }
+  // Ölçüm (panel → Davet): kişi tutulmaz, yalnız günlük toplam
+  function count(action) {
+    if (!validId) return;
+    fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/page/h/" + action + "/" + (isIOS ? "ios" : isAndroid ? "android" : "other") + "?c=" + encodeURIComponent(code), { method: "POST", keepalive: true }).catch(function () {});
+  }
+  count("open");
+  $("get").addEventListener("click", function () { count("get"); });
+  $("open").addEventListener("click", function () { count("app"); });
 
   if (!/^[A-Z0-9]{6}$/.test(code)) return;
   fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/hatim/" + code)

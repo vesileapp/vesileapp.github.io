@@ -55,7 +55,7 @@
 </main>
 <script>
 (function () {
-  var T = {"tr": {"kicker": "Toplu zikre davetlisin", "open": "Vesile'de aç ve katıl", "get": "Vesile'yi indir", "prog": "{p}/{t} · {r}. tur · {k} kişi katıldı", "missing": "Bu toplu zikir bulunamadı.", "loading": "Yükleniyor…"}, "ar": {"kicker": "أنت مدعو إلى ذكر جماعي", "open": "افتح Vesile وشارك", "get": "حمّل Vesile", "prog": "{p}/{t} · الجولة {r} · شارك {k} شخصًا", "missing": "لم يتم العثور على هذا الذكر الجماعي.", "loading": "جارٍ التحميل…"}, "en": {"kicker": "You're invited to a group dhikr", "open": "Open in Vesile & join", "get": "Get Vesile", "prog": "{p}/{t} · round {r} · {k} people joined", "missing": "This group dhikr wasn't found.", "loading": "Loading…"}};
+  var T = {"tr": {"have": "Zaten yüklü mü? Vesile'de aç", "kicker": "Toplu zikre davetlisin", "open": "Vesile'de aç ve katıl", "get": "Vesile'yi indir", "prog": "{p}/{t} · {r}. tur · {k} kişi katıldı", "missing": "Bu toplu zikir bulunamadı.", "loading": "Yükleniyor…"}, "ar": {"have": "هل التطبيق مثبّت؟ افتح Vesile", "kicker": "أنت مدعو إلى ذكر جماعي", "open": "افتح Vesile وشارك", "get": "حمّل Vesile", "prog": "{p}/{t} · الجولة {r} · شارك {k} شخصًا", "missing": "لم يتم العثور على هذا الذكر الجماعي.", "loading": "جارٍ التحميل…"}, "en": {"have": "Already installed? Open Vesile", "kicker": "You're invited to a group dhikr", "open": "Open in Vesile & join", "get": "Get Vesile", "prog": "{p}/{t} · round {r} · {k} people joined", "missing": "This group dhikr wasn't found.", "loading": "Loading…"}};
   var X0 = {"tr": {"gd_tefriciye": "Salât-ı Tefrîciye", "gd_hasbunallah": "Hasbünallâhü ve ni'mel vekîl", "gd_ihlas": "İhlâs Sûresi", "gd_ayetelkursi": "Âyete'l-Kürsî", "gd_fatiha": "Fâtiha Sûresi", "gd_salavat": "Salavât-ı Şerîfe", "gd_tevhid": "Kelime-i Tevhîd", "gd_istigfar": "İstiğfâr", "gd_subhanallahi": "Sübhânallâhi ve bi-hamdihî", "gd_lahavle": "Lâ havle ve lâ kuvvete illâ billâh"}, "ar": {"gd_tefriciye": "الصلاة التفريجية", "gd_hasbunallah": "حسبنا الله ونعم الوكيل", "gd_ihlas": "سورة الإخلاص", "gd_ayetelkursi": "آية الكرسي", "gd_fatiha": "سورة الفاتحة", "gd_salavat": "الصلوات الشريفة", "gd_tevhid": "كلمة التوحيد", "gd_istigfar": "الاستغفار", "gd_subhanallahi": "سبحان الله وبحمده", "gd_lahavle": "لا حول ولا قوة إلا بالله"}, "en": {"gd_tefriciye": "Salat al-Tafrijiyya", "gd_hasbunallah": "Hasbunallahu wa ni'mal wakil", "gd_ihlas": "Surah Al-Ikhlas", "gd_ayetelkursi": "Ayat al-Kursi", "gd_fatiha": "Surah Al-Fatiha", "gd_salavat": "Salawat Sharifa", "gd_tevhid": "Kalima at-Tawhid", "gd_istigfar": "Istighfar", "gd_subhanallahi": "SubhanAllahi wa bihamdihi", "gd_lahavle": "La hawla wa la quwwata illa billah"}};
   var lang = (navigator.language || "en").slice(0, 2);
   var L = T[lang] || T.en, X = X0[lang] || X0.en;
@@ -80,6 +80,18 @@
     ? "intent://z?i=" + encodeURIComponent(id) + "#Intent;scheme=vesile;package=com.emrebarutcu.vesile;S.browser_fallback_url=" + encodeURIComponent(PLAY) + ";end"
     : "vesile://z?i=" + encodeURIComponent(id);
   if (!isIOS && !isAndroid) $("open").hidden = true;
+  // iPhone (4 Kas 2026): sayfayı gören genelde uygulamasızdır, vesile:// hata verir; indirme öne geçer
+  if (isIOS) {
+    $("get").className = "btn"; $("open").className = "btn alt"; $("open").textContent = L.have;
+    $("get").parentNode.insertBefore($("get"), $("open"));
+  }
+  // Ölçüm (panel → Davet): kişi tutulmaz, yalnız günlük toplam
+  function count(action) {
+    fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/page/z/" + action + "/" + (isIOS ? "ios" : isAndroid ? "android" : "other") + "?c=" + encodeURIComponent(id), { method: "POST", keepalive: true }).catch(function () {});
+  }
+  count("open");
+  $("get").addEventListener("click", function () { count("get"); });
+  $("open").addEventListener("click", function () { count("app"); });
   fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/zikir/" + encodeURIComponent(id))
     .then(function (r) { if (!r.ok) throw 0; return r.json(); })
     .then(function (g) {

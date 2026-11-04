@@ -55,7 +55,7 @@
 </main>
 <script>
 (function () {
-  var T = {"tr": {"kicker": "Dua isteği", "open": "Vesile'de aç ve Âmin de", "get": "Vesile'yi indir", "prog": "{n} kişi Âmin dedi", "missing": "Bu dua isteği bulunamadı.", "loading": "Yükleniyor…"}, "ar": {"kicker": "طلب دعاء", "open": "افتح Vesile وقل آمين", "get": "حمّل Vesile", "prog": "آمين: {n}", "missing": "لم يتم العثور على طلب الدعاء.", "loading": "جارٍ التحميل…"}, "en": {"kicker": "Dua request", "open": "Open in Vesile & say Ameen", "get": "Get Vesile", "prog": "Ameen: {n}", "missing": "This dua request wasn't found.", "loading": "Loading…"}};
+  var T = {"tr": {"have": "Zaten yüklü mü? Vesile'de aç", "kicker": "Dua isteği", "open": "Vesile'de aç ve Âmin de", "get": "Vesile'yi indir", "prog": "{n} kişi Âmin dedi", "missing": "Bu dua isteği bulunamadı.", "loading": "Yükleniyor…"}, "ar": {"have": "هل التطبيق مثبّت؟ افتح Vesile", "kicker": "طلب دعاء", "open": "افتح Vesile وقل آمين", "get": "حمّل Vesile", "prog": "آمين: {n}", "missing": "لم يتم العثور على طلب الدعاء.", "loading": "جارٍ التحميل…"}, "en": {"have": "Already installed? Open Vesile", "kicker": "Dua request", "open": "Open in Vesile & say Ameen", "get": "Get Vesile", "prog": "Ameen: {n}", "missing": "This dua request wasn't found.", "loading": "Loading…"}};
   var X0 = {"tr": {"illness": "Hastalık", "deceased": "Vefat", "exam": "Sınav", "travel": "Yolculuk", "debt": "Borç", "guidance": "Hidayet", "other": "Diğer"}, "ar": {"illness": "مرض", "deceased": "وفاة", "exam": "امتحان", "travel": "سفر", "debt": "دَين", "guidance": "هداية", "other": "أخرى"}, "en": {"illness": "Illness", "deceased": "Deceased", "exam": "Exam", "travel": "Travel", "debt": "Debt", "guidance": "Guidance", "other": "Other"}};
   var lang = (navigator.language || "en").slice(0, 2);
   var L = T[lang] || T.en, X = X0[lang] || X0.en;
@@ -80,6 +80,18 @@
     ? "intent://d?i=" + encodeURIComponent(id) + "#Intent;scheme=vesile;package=com.emrebarutcu.vesile;S.browser_fallback_url=" + encodeURIComponent(PLAY) + ";end"
     : "vesile://d?i=" + encodeURIComponent(id);
   if (!isIOS && !isAndroid) $("open").hidden = true;
+  // iPhone (4 Kas 2026): sayfayı gören genelde uygulamasızdır, vesile:// hata verir; indirme öne geçer
+  if (isIOS) {
+    $("get").className = "btn"; $("open").className = "btn alt"; $("open").textContent = L.have;
+    $("get").parentNode.insertBefore($("get"), $("open"));
+  }
+  // Ölçüm (panel → Davet): kişi tutulmaz, yalnız günlük toplam
+  function count(action) {
+    fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/page/d/" + action + "/" + (isIOS ? "ios" : isAndroid ? "android" : "other") + "?c=" + encodeURIComponent(id), { method: "POST", keepalive: true }).catch(function () {});
+  }
+  count("open");
+  $("get").addEventListener("click", function () { count("get"); });
+  $("open").addEventListener("click", function () { count("app"); });
   fetch("https://ezanapp-backend-production.up.railway.app/v1/invite/dua/" + encodeURIComponent(id))
     .then(function (r) { if (!r.ok) throw 0; return r.json(); })
     .then(function (g) {
